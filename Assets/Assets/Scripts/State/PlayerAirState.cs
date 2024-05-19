@@ -7,6 +7,7 @@ public class PlayerAirState : PlayerState
     public override void Enter()
     {
         base.Enter();
+        player.IsGroundValue(false);
     }
 
     public override void Exit()

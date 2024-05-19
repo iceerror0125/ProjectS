@@ -42,8 +42,9 @@ public class InputController : SingletonMono<InputController>
         Observer.instance.Annouce(eventType);
     }
 
-    private float maxX;
-    private float maxY;
+    private float maxDistanceX = 5;
+    private float maxDistanceY = 5;
+    private float cameraSpeed = 10;
     public void OnBinocularTap()
     {
         // Observer.instance.Annouce(EventType.UseBinoculars);
@@ -55,6 +56,7 @@ public class InputController : SingletonMono<InputController>
             
         }
     }
+
     private void Update()
     {
         if (joyStick.gameObject.activeSelf)
@@ -67,14 +69,13 @@ public class InputController : SingletonMono<InputController>
             }
             else
             {
-                maxX = GameManager.instance.Player.transform.localPosition.x + 5;
-                maxY = GameManager.instance.Player.transform.localPosition.y + 5;
                 Transform fakePlayer = GameManager.instance.Player.fakePlayer.transform;
                 cam.Follow = fakePlayer;
-                var horizontalMove = joyStick.Horizontal * 5;
-                var verticalMove = joyStick.Vertical * 5;
-                fakePlayer.transform.position = new Vector2(Mathf.Clamp(fakePlayer.position.x + horizontalMove * Time.deltaTime, -maxX, maxX ),
-                    Mathf.Clamp(fakePlayer.position.y + verticalMove * Time.deltaTime, -maxY, maxY));
+              
+                var horizontalMoveSpeed = joyStick.Horizontal * cameraSpeed;
+                var verticalMoveSpeed = joyStick.Vertical * cameraSpeed;
+                fakePlayer.transform.localPosition = new Vector2(Mathf.Clamp(fakePlayer.localPosition.x + horizontalMoveSpeed * Time.deltaTime, -maxDistanceX, maxDistanceX ),
+                    Mathf.Clamp(fakePlayer.localPosition.y + verticalMoveSpeed * Time.deltaTime, -maxDistanceY, maxDistanceY));
             }
         }
     }

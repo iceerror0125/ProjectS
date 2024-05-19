@@ -4,14 +4,16 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    public float moveSpeed;
-    public float jumpForce;
-    public GameObject fakePlayer; // use to move camera in observe mode
     public Rigidbody2D rb { get; private set; }
     public Animator anim { get; private set; }
+    [SerializeField] private AnimationEventHandler animHandler;
 
+    [SerializeField] private float moveSpeed = 5;
+    [SerializeField] private float jumpForce = 5;
+    public GameObject fakePlayer; // use to move camera in observe mode
     public float dir {get; private set;}
     public bool isGround { get; private set; }
+    public void IsGroundValue(bool value) => isGround = value;
 
     #region State
     public StateMachine stateMachine { get; private set; }
@@ -35,7 +37,14 @@ public class Player : MonoBehaviour
 
         stateMachine = new StateMachine(this);
         stateMachine.InitState(EPlayerAction.Idle);
-       
+    }
+    private void OnEnable()
+    {
+        animHandler.OnFinishTrigger += Idle;
+    }
+    private void OnDisable()
+    {
+        animHandler.OnFinishTrigger -= Idle;
     }
 
     public void MoveLeft()
@@ -50,8 +59,11 @@ public class Player : MonoBehaviour
     }
     public void Jump()
     {
-        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        stateMachine.ChangeState(EPlayerAction.Jump);
+        if (isGround)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
+            stateMachine.ChangeState(EPlayerAction.Jump);
+        }
     }
     public void Idle()
     {
@@ -59,7 +71,6 @@ public class Player : MonoBehaviour
         {
             ZeroVelocity();
             stateMachine.ChangeState(EPlayerAction.Idle);
-
         }
     }
     public void Interact()
