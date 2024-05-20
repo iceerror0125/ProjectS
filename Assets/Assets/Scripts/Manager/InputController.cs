@@ -51,9 +51,10 @@ public class InputController : SingletonMono<InputController>
         ChangeControlMode();
         if (!joyStick.gameObject.activeSelf)
         {
-            cam.Follow = GameManager.instance.Player.transform;
-            GameManager.instance.Player.ResetFakePlayerPosition();
-            
+            Player player = GameManager.instance.Player;
+            cam.Follow = player.transform;
+            player.ResetFakePlayerPosition();
+            player.Idle();
         }
     }
 
@@ -74,9 +75,15 @@ public class InputController : SingletonMono<InputController>
               
                 var horizontalMoveSpeed = joyStick.Horizontal * cameraSpeed;
                 var verticalMoveSpeed = joyStick.Vertical * cameraSpeed;
-                fakePlayer.transform.localPosition = new Vector2(Mathf.Clamp(fakePlayer.localPosition.x + horizontalMoveSpeed * Time.deltaTime, -maxDistanceX, maxDistanceX ),
-                    Mathf.Clamp(fakePlayer.localPosition.y + verticalMoveSpeed * Time.deltaTime, -maxDistanceY, maxDistanceY));
+                fakePlayer.transform.localPosition = new Vector2(
+                    Mathf.Clamp(fakePlayer.localPosition.x + horizontalMoveSpeed * Time.deltaTime * GameManager.instance.Player.dir, -maxDistanceX, maxDistanceX ),
+                    Mathf.Clamp(fakePlayer.localPosition.y + verticalMoveSpeed * Time.deltaTime, -maxDistanceY, maxDistanceY)
+                    );
             }
+        }
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            OnBinocularTap();
         }
     }
 }

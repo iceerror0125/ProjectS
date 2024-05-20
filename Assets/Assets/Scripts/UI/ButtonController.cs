@@ -7,7 +7,6 @@ public class ButtonController : MonoBehaviour
     public LongClickButton left;
     public LongClickButton right;
 
-   
     void Update()
     {
         if (left.IsPressed)
@@ -20,5 +19,10 @@ public class ButtonController : MonoBehaviour
             left.CloseButton();
             right.DoTapEvent();
         }
+    }
+    private void OnDisable()
+    {
+        right.DoUnTapEvent();
+        left.DoUnTapEvent();
     }
 }
