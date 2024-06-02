@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public abstract class InteractableObject : MonoBehaviour
@@ -47,11 +48,16 @@ public abstract class InteractableObject : MonoBehaviour
             OnObjectStay(collision);
         }
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        Debug.Log("HEHEHE");
+    }
     protected virtual void Interacted()
     {
         canInteractable = false;
     }
-    protected virtual void Notify() { Interacted(); }
+    protected virtual void Notify() {}
 
     protected virtual void OnObjectEnter(Collider2D collision) { }
     protected virtual void OnObjectExit(Collider2D collision) { }

@@ -12,10 +12,12 @@ public class PlayerInteractState : PlayerState
     public override void Exit()
     {
         base.Exit();
+        // player.stateMachine.ChangeState(EPlayerAction.Idle);
     }
 
     public override void Update()
     {
         base.Update();
+       
     }
 }

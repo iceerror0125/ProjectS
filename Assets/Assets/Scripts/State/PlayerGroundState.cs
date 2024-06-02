@@ -7,7 +7,7 @@ public class PlayerGroundState : PlayerState
     public override void Enter()
     {
         base.Enter();
-        player.IsGroundValue(true);
+        player.ChangeToDefaultGravity();
     }
 
     public override void Exit()
@@ -18,9 +18,15 @@ public class PlayerGroundState : PlayerState
     public override void Update()
     {
         base.Update();
-        if (Mathf.Abs(player.rb.velocity.x) > 0.2f)
+
+        if (Mathf.Abs(player.rb.velocity.x) > 0.1f)
         {
             player.stateMachine.ChangeState(EPlayerAction.Run);
+        }
+
+        if (!player.CheckIsGround())
+        {
+            player.stateMachine.ChangeState(EPlayerAction.Fall);
         }
     }
 }

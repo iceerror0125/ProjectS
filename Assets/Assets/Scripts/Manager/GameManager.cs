@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : SingletonMono<GameManager>
 {
@@ -14,5 +15,9 @@ public class GameManager : SingletonMono<GameManager>
     {
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
+    }
+    public void ResetGame()
+    {
+        SceneManager.LoadSceneAsync(SceneManager.GetActiveScene().name);
     }
 }

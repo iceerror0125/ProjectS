@@ -8,18 +8,32 @@ public class AttackObject : InteractableObject
     [SerializeField] private GameObject active;
     private Rigidbody2D rb;
     private BoxCollider2D col;
+
+    private float pushForce = 20;
+    private int defaultMass = 100;
+    [SerializeField] private int customMass = 1;
+
+    private bool isNotify;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         col = GetComponent<BoxCollider2D>();
     }
+    private void Start()
+    {
+        rb.mass = defaultMass;
+    }
     protected override void OnObjectEnter(Collider2D collision)
     {
         base.OnObjectEnter(collision);
 
-        if (Mathf.Abs(rb.velocity.x) > 0.1f && collision.gameObject.layer == 8)
+        if (Mathf.Abs(rb.velocity.x) > 0.1f && collision.gameObject.layer == (int)EGameLayerName.Ground)
         {
-            rb.velocity = Vector3.zero;
+
+            //rb.velocity = Vector3.zero;
+            rb.mass = defaultMass;
+            Interacted();
         }
     }
     protected override void OnPlayerEnter()
@@ -40,7 +54,6 @@ public class AttackObject : InteractableObject
     protected override void Notify()
     {
         base.Notify();
-
         Player player = GameManager.instance.Player;
         player.Interact();
 
@@ -54,9 +67,10 @@ public class AttackObject : InteractableObject
         }
 
         float atkDir = player.transform.position.x > transform.position.x ? -1 : 1;
-        rb.AddForce(new Vector2(atkDir * 20, rb.velocity.y), ForceMode2D.Impulse);
-        col.offset = Vector2.zero;
-        col.size = new Vector2(1, 1);
+        rb.mass = customMass;
+        rb.AddForce(new Vector2(atkDir * pushForce, 0), ForceMode2D.Impulse);
+        /*col.offset = Vector2.zero;
+        col.size = new Vector2(1, 1);*/
     }
     protected override void Interacted()
     {

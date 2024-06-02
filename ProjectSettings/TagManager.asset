@@ -14,7 +14,7 @@ TagManager:
   - AttackObject
   - Player
   - Ground
-  - 
+  - TriggerObject
   - 
   - 
   - 
@@ -40,4 +40,13 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: TriggerObject
+    uniqueID: 2362464207
+    locked: 0
+  - name: Player
+    uniqueID: 1873998835
+    locked: 0
+  - name: Ground
+    uniqueID: 66045545
     locked: 0

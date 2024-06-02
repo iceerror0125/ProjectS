@@ -8,8 +8,11 @@ public class InputController : SingletonMono<InputController>
     [SerializeField] private GameObject controlGroup;
     [SerializeField] private Joystick joyStick;
     [SerializeField] private CinemachineVirtualCamera cam;
+
+    private Player player;
     private void Start()
     {
+        player = GameManager.instance.Player;
         controlGroup.SetActive(true);
         joyStick.gameObject.SetActive(false);
     }
@@ -51,10 +54,9 @@ public class InputController : SingletonMono<InputController>
         ChangeControlMode();
         if (!joyStick.gameObject.activeSelf)
         {
-            Player player = GameManager.instance.Player;
             cam.Follow = player.transform;
             player.ResetFakePlayerPosition();
-            player.Idle();
+            player.ToIdle();
         }
     }
 
@@ -72,18 +74,48 @@ public class InputController : SingletonMono<InputController>
             {
                 Transform fakePlayer = GameManager.instance.Player.fakePlayer.transform;
                 cam.Follow = fakePlayer;
-              
+
                 var horizontalMoveSpeed = joyStick.Horizontal * cameraSpeed;
                 var verticalMoveSpeed = joyStick.Vertical * cameraSpeed;
                 fakePlayer.transform.localPosition = new Vector2(
-                    Mathf.Clamp(fakePlayer.localPosition.x + horizontalMoveSpeed * Time.deltaTime * GameManager.instance.Player.dir, -maxDistanceX, maxDistanceX ),
+                    Mathf.Clamp(fakePlayer.localPosition.x + horizontalMoveSpeed * Time.deltaTime * GameManager.instance.Player.dir, -maxDistanceX, maxDistanceX),
                     Mathf.Clamp(fakePlayer.localPosition.y + verticalMoveSpeed * Time.deltaTime, -maxDistanceY, maxDistanceY)
                     );
             }
         }
-        if (Input.GetKeyDown(KeyCode.X))
+#if UNITY_EDITOR
+        PlayOnPC();
+#endif
+    }
+
+    private void PlayOnPC()
+    {
+        if (Input.GetKeyDown(KeyCode.C))
         {
             OnBinocularTap();
+        }
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            OnMoveLeftTap();
+        }
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            OnMoveRightTap();
+        }
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            OnJumpButtonTap();
+        }
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            OnInteractWithObjectTap();
+        }
+        if (Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.LeftArrow))
+        {
+            if (player.stateMachine.currentState is PlayerGroundState)
+            {
+                player.ToIdle();
+            }
         }
     }
 }

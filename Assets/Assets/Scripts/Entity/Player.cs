@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -10,15 +12,24 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float moveSpeed = 5;
     [SerializeField] private float jumpForce = 5;
+    [SerializeField] private Transform groundCheckForward;
+    [SerializeField] private Transform groundCheckBack;
     public GameObject fakePlayer; // use to move camera in observe mode
-    public float dir {get; private set;}
+    private float groundCheckLenght = 0.1f;
+
+    public StateMachine stateMachine { get; private set; }
+    public float dir { get; private set; }
     public bool isGround { get; private set; }
     public void IsGroundValue(bool value) => isGround = value;
 
-    #region State
-    public StateMachine stateMachine { get; private set; }
-
-    #endregion
+    private void OnEnable()
+    {
+        animHandler.OnFinishTrigger += Idle;
+    }
+    private void OnDisable()
+    {
+        animHandler.OnFinishTrigger -= Idle;
+    }
 
     private void Start()
     {
@@ -29,6 +40,32 @@ public class Player : MonoBehaviour
         stateMachine.currentState.Update();
     }
 
+    public bool CheckIsGround()
+    {
+        var raycastForward = Physics2D.Raycast(groundCheckForward.position, Vector2.down, groundCheckLenght);
+        var raycastBack = Physics2D.Raycast(groundCheckBack.position, Vector2.down, groundCheckLenght);
+        Debug.Log($"{raycastForward.collider is null}");
+        /*  if (raycastForward.collider != null && raycastBack.collider != null && CheckIsGroundLayer(raycastBack.collider.gameObject.layer) && CheckIsGroundLayer(raycastForward.collider.gameObject.layer))
+          {
+              return true;
+          }
+          return false;*/
+        if (raycastForward.collider is null && raycastBack.collider is null)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private bool CheckIsGroundLayer(int layer)
+    {
+        switch (layer)
+        {
+            case (int)EGameLayerName.Ground: return true;
+            case (int)EGameLayerName.TriggerObject: return true;
+            default: return false;
+        }
+    }
     private void Init()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -38,15 +75,6 @@ public class Player : MonoBehaviour
         stateMachine = new StateMachine(this);
         stateMachine.InitState(EPlayerAction.Idle);
     }
-    private void OnEnable()
-    {
-        animHandler.OnFinishTrigger += Idle;
-    }
-    private void OnDisable()
-    {
-        animHandler.OnFinishTrigger -= Idle;
-    }
-
     public void MoveLeft()
     {
         rb.velocity = new Vector2(moveSpeed * -1, rb.velocity.y);
@@ -59,19 +87,24 @@ public class Player : MonoBehaviour
     }
     public void Jump()
     {
-        if (isGround)
+        if (stateMachine.currentState is PlayerGroundState)
         {
             rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             stateMachine.ChangeState(EPlayerAction.Jump);
         }
     }
-    public void Idle()
+    public void AddForce(float x = 0, float y = 0)
     {
-        if (Mathf.Abs(rb.velocity.y) < 0.1f)
-        {
-            ZeroVelocity();
-            stateMachine.ChangeState(EPlayerAction.Idle);
-        }
+        rb.AddForce(new Vector2(x, y), ForceMode2D.Impulse);
+    }
+    public void ToIdle()
+    {
+        if (stateMachine.currentState is PlayerGroundState)
+            Idle();
+    }
+    private void Idle()
+    {
+        stateMachine.ChangeState(EPlayerAction.Idle);
     }
     public void Interact()
     {
@@ -90,12 +123,6 @@ public class Player : MonoBehaviour
     {
         rb.velocity = Vector2.zero;
     }
-
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.layer == 8)
-        {
-            stateMachine.ChangeState(EPlayerAction.Idle);
-        }
-    }
+    public void ChangeToFallGravity() { rb.gravityScale = GameConstants.fallGravity; }
+    public void ChangeToDefaultGravity() { rb.gravityScale = GameConstants.defaultGravity; }
 }
